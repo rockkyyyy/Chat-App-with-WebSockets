@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat APP</title>
+  <style>
+    /* Reset default margin and padding */
+    body, h1, ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Basic styles for the chat container */
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header styles */
+    .chat-header {
+      background-color: #4caf50;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+    /* Chat messages container */
+    .chat-messages {
+      padding: 15px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    /* Chat input and send button */
+    .chat-input {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background-color: #fff;
+      border-top: 1px solid #ddd;
+    }
+
+    .chat-input input[type="text"] {
+      flex-grow: 1;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-right: 10px;
+    }
+
+    .chat-input button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #4caf50;
+      color: #fff;
+    }
+
+    /* Styles for user messages */
+    .user-message {
+      background-color: #4caf50;
+      color: #fff;
+      align-self: flex-end;
+      max-width: 70%;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      word-wrap: break-word;
+    }
+
+    /* Styles for other users' messages */
+    .other-message {
+      background-color: #2196f3;
+      color: #fff;
+      /* align-self: flex-start; */
+      /* max-width: 70%; */
+      /* border-radius: 10px; */
+      /* padding:  12px; */
+      /* margin-bottom: 8px; */
+      /* word-wrap: break-word; */
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      ROCK-CHAT
+    </div>
+
+    <div class="chat-messages" id="messages"></div>
+
+    <div class="chat-input">
+      <input type="text" id="message" placeholder="Enter Message" />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const sendBtn = document.getElementById("sendBtn");
+    const messageInput = document.getElementById("message");
+    const allMessages = document.getElementById("messages");
+
+    socket.on("message", ({ message, isUser, color }) => {
+  const messageContainer = document.createElement("div");
+  const p = document.createElement("p");
+  p.innerText = message;
+  messageContainer.appendChild(p);
+  messageContainer.classList.add(isUser ? "user-message" : "other-message");
+  messageContainer.style.backgroundColor = color; // Set message container color
+  allMessages.appendChild(messageContainer);
+  allMessages.scrollTop = allMessages.scrollHeight;
+});
+
+    sendBtn.addEventListener("click", (e) => {
+      const message = messageInput.value;
+      if (message.trim() !== "") {
+        socket.emit("user-message", { message, isUser: true });
+        messageInput.value = "";
+      }
+    });
+
+    messageInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        sendBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
